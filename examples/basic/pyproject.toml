@@ -1,0 +1,15 @@
+[project]
+    authors      = [{ name = "insleker", email = "existedinnettw@gmail.com" }]
+    dependencies = ["puppemon-py-script"]
+    description  = "basic examples to demo puppemon-py-script usage"
+    name         = "basic"
+    # readme          = "README.md"
+    requires-python = ">=3.9, <4"
+    version         = "0.1.0"
+
+[build-system]
+    build-backend = "uv_build"
+    requires      = ["uv_build>=0.8.12,<0.9.0"]
+
+[tool.uv.sources]
+    puppemon-py-script = { path = "../.." }

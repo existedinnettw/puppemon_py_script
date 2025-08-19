@@ -1,0 +1,17 @@
+
+syntax = "proto3";
+
+package script;
+
+import "google/protobuf/empty.proto";
+
+service Script {
+  rpc Stop(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc Pause(PauseRequest) returns (google.protobuf.Empty) {}
+  rpc Resume(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+}
+
+message PauseRequest {
+  // Timeout in milliseconds for the pause operation; 0 or unset means no timeout
+  uint32 timeout_millis = 1;
+}
