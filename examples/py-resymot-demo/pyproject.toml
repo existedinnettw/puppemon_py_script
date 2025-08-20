@@ -1,0 +1,19 @@
+[project]
+    authors         = [{ name = "insleker", email = "bkinnightskytw@gmail.com" }]
+    dependencies    = ["puppemon-py-script", "py-resymot-client"]
+    description     = "Examples to demo puppemon-py-script usage with `py-resymot-client` lib"
+    name            = "py-resymot-demo"
+    readme          = "README.md"
+    requires-python = ">=3.13"
+    version         = "0.1.0"
+
+[dependency-groups]
+    dev = ["python-dotenv>=1.0.1,<2"]
+
+[build-system]
+    build-backend = "uv_build"
+    requires      = ["uv_build>=0.8.12,<0.9.0"]
+
+[tool.uv.sources]
+    puppemon-py-script = { path = "../.." }
+    py-resymot-client  = { path = "../../../py_resymot_client" }

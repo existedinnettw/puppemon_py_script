@@ -11,10 +11,6 @@ sys_path.append(os_path.join(os_path.dirname(__file__), "generated"))
 from .pausable import Pausable, PausableController  # noqa: F401
 from .generated import script_pb2_grpc  # noqa: F401
 from .script_servicer import ScriptServicer  # noqa: F401
+from .util import default_main  # noqa: F401
 
-__all__ = [
-    "Pausable",
-    "PausableController",
-    "script_pb2_grpc",
-    "ScriptServicer",
-]
+__all__ = ["Pausable", "PausableController", "script_pb2_grpc", "ScriptServicer", "default_main"]

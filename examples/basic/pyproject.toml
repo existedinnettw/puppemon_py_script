@@ -1,9 +1,9 @@
 [project]
-    authors      = [{ name = "insleker", email = "existedinnettw@gmail.com" }]
-    dependencies = ["puppemon-py-script"]
-    description  = "basic examples to demo puppemon-py-script usage"
-    name         = "basic"
-    # readme          = "README.md"
+    authors         = [{ name = "insleker", email = "existedinnettw@gmail.com" }]
+    dependencies    = ["puppemon-py-script"]
+    description     = "Basic examples to demo puppemon-py-script usage"
+    name            = "basic"
+    readme          = "README.md"
     requires-python = ">=3.9, <4"
     version         = "0.1.0"
 

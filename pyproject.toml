@@ -1,9 +1,6 @@
 [project]
     authors         = [{ name = "insleker", email = "existedinnettw@gmail.com" }]
-    dependencies    = [
-    "grpcio",
-    "protobuf>=6.32.0",
-]
+    dependencies    = ["grpcio", "protobuf>=6.32.0"]
     description     = "A scripting framework open to end user to ensure they follow puppemon requirement."
     name            = "puppemon-py-script"
     readme          = "README.md"
@@ -11,7 +8,7 @@
     version         = "0.1.0"
 
 [dependency-groups]
-    dev = ["grpcio-tools>=1.73.0,<2.0.0", "ruff>=0.11.5,<0.12"]
+    dev = ["grpcio-tools>=1.73.0,<2.0.0", "ruff>=0.11.5,<1.0.0"]
 
 [build-system]
     build-backend = "uv_build"
