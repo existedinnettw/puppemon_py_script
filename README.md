@@ -17,3 +17,9 @@ Then, it is recommended to check out examples to see how to use the framework in
 cd examples/basic
 uv run python -m basic
 ```
+
+For tests,
+
+```bash
+uv run behave
+```

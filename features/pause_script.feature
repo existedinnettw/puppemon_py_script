@@ -23,6 +23,13 @@ Feature: Pause script execution
 		And each task halts at its next pausable point
 		And the script state is "paused"
 
+	Scenario: PAUSE times out when all tasks cannot pause in time
+		Given task A is executing and cannot reach a pausable point within 1 second
+		And task B is executing and cannot reach a pausable point within 1 second
+		When the client sends the PAUSE command with a timeout of 1 second
+		Then the server responds with a timeout error
+		And no global pause is applied (tasks continue running)
+
 	Scenario: PAUSE times out when not all tasks can pause in time
 		Given task A is executing and cannot reach a pausable point within 1 second
 		And task B is executing and can reach a pausable point within 1 second
