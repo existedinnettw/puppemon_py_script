@@ -1,4 +1,4 @@
-from __future__ import annotations  # Add this at the top of your file
+from __future__ import annotations
 
 import asyncio
 from typing import Optional
@@ -33,10 +33,50 @@ class Pausable:
             raise RuntimeError(
                 "PausableController has not been set. Please initialize it in your main entry point."
             )
+        # Auto-register this named task with the controller for coordination
+        if self.name:
+            type(self)._controller.register_task(self.name)
 
     async def maybe_pause(self) -> None:
         """Cooperate with the controller to pause/resume when requested."""
         await type(self)._controller.handle_pause(self)
+
+    # Deterministic cleanup API (recommended)
+    def close(self) -> None:
+        try:
+            ctrl = getattr(type(self), "_controller", None)
+            if ctrl is not None:
+                ctrl.unregister_task(self.name)
+        except Exception:
+            # Best-effort; never raise during cleanup
+            pass
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc, tb):
+        """
+        Context manager support for automatic cleanup, which is better than relying on __del__. `__del__` can be
+        called at unpredictable times, using a context manager ensures that resources are released deterministically.
+
+        ```python
+        with Pausable() as p:
+            await do_something()
+            await p.maybe_pause()
+        ```
+        """
+        self.close()
+        return False
+
+    # Best-effort GC-time cleanup (not guaranteed timely)
+    def __del__(self):
+        try:
+            ctrl = getattr(type(self), "_controller", None)
+            if ctrl is not None:
+                ctrl.unregister_task(getattr(self, "name", None))
+        except Exception:
+            # Avoid issues during interpreter shutdown
+            pass
 
 
 class PausableController:
@@ -54,6 +94,8 @@ class PausableController:
         self._expected_tasks = 0
         self._paused_tasks: set[str] = set()
         self._all_paused_event = asyncio.Event()
+        # Track active tasks seen by the controller (by name)
+        self._active_tasks: set[str] = set()
 
     def pause(self):
         """Called by an external entity (like a gRPC server) to request a pause."""
@@ -61,14 +103,18 @@ class PausableController:
             self._pause_generation += 1
             self._paused_tasks.clear()
             self._all_paused_event.clear()
+            # Auto-determine expected tasks if not explicitly configured
+            if self._expected_tasks <= 0:
+                self._expected_tasks = len(self._active_tasks)
             self._pause_requested.set()
 
     def resume(self):
         """Called by an external entity to request a resume."""
-        if self._is_paused:
+        if self._is_paused or self._pause_requested.is_set():
             # Allow paused tasks to proceed and ensure new calls won't re-enter pause immediately
             self._resume_requested.set()
             self._pause_requested.clear()
+        self._is_paused = False
 
     @property
     def is_paused(self) -> bool:
@@ -80,6 +126,19 @@ class PausableController:
         If set to 0, coordinated waiting is effectively disabled.
         """
         self._expected_tasks = max(0, int(count))
+
+    def register_task(self, name: str) -> None:
+        """Register a task name as active for coordination.
+
+        This is called automatically by Pausable when a name is provided.
+        """
+        if name:
+            self._active_tasks.add(name)
+
+    def unregister_task(self, name: str) -> None:
+        """Unregister a task name when no longer active."""
+        if name:
+            self._active_tasks.discard(name)
 
     async def wait_all_paused(self, timeout: Optional[float]) -> bool:
         """Wait until all expected tasks report paused for the current generation.
@@ -111,9 +170,8 @@ class PausableController:
         if self._pause_requested.is_set():
             self._is_paused = True
 
-            # Mark this Pausable's task as paused for current generation 
+            # Mark this Pausable's task as paused for current generation
             self._paused_tasks.add(pausable_instance.name)
-            # print("paused tasks set:", self._paused_tasks)
             if self._expected_tasks > 0 and len(self._paused_tasks) >= self._expected_tasks:
                 self._all_paused_event.set()
 
